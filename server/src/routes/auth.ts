@@ -1,12 +1,12 @@
 import { Express, Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 
 const database = require('../db/database');
 
 // JWT 密钥
 const JWT_SECRET = process.env.JWT_SECRET || 'pve-manager-secret-key-change-in-production';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
+const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN || '24h') as string;
 
 // 用户角色权限
 export const UserRoles = {
@@ -247,7 +247,7 @@ export function setupAuthRoutes(app: Express) {
       const token = jwt.sign(
         { id: user.id, username: user.username, email: user.email, role: user.role },
         JWT_SECRET,
-        { expiresIn: JWT_EXPIRES_IN }
+        { expiresIn: JWT_EXPIRES_IN } as SignOptions
       );
       
       // 更新最后登录时间

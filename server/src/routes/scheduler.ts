@@ -1,5 +1,13 @@
 import { Router, Request, Response } from 'express';
-import { v4 as uuidv4 } from 'uuid';
+
+// 生成 UUID
+function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
 
 const router = Router();
 
@@ -280,7 +288,7 @@ export function createSchedulerRoutes(db: any, authenticateToken: any, requirePe
         return res.status(400).json({ success: false, error: '缺少必要参数' });
       }
       
-      const id = uuidv4();
+      const id = generateUUID();
       const now = new Date().toISOString();
       const nextRun = getNextRunTime(cron_expression || '0 0 * * *', scheduled_time);
       
