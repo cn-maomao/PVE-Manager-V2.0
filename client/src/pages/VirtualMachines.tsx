@@ -304,7 +304,7 @@ function VirtualMachines() {
       setSelectedRowKeys(newSelectedRowKeys);
     },
     getCheckboxProps: (record: VMRecord) => ({
-      disabled: !hasPermission('vm_control'),
+      disabled: !hasPermission('vm:start'),
     }),
   };
 
@@ -434,7 +434,7 @@ function VirtualMachines() {
       render: (record: VMRecord) => (
         <Space size="small">
           {/* VNC 控制台 */}
-          {record.status === 'running' && hasPermission('console') && (
+          {record.status === 'running' && hasPermission('vm:console') && (
             <Tooltip title="控制台">
               <Button
                 size="small"
@@ -444,7 +444,7 @@ function VirtualMachines() {
             </Tooltip>
           )}
           
-          {record.status === 'stopped' && hasPermission('vm_control') && (
+          {record.status === 'stopped' && hasPermission('vm:start') && (
             <Tooltip title="启动">
               <Button
                 type="primary"
@@ -456,7 +456,7 @@ function VirtualMachines() {
             </Tooltip>
           )}
           
-          {record.status === 'running' && hasPermission('vm_control') && (
+          {record.status === 'running' && hasPermission('vm:stop') && (
             <>
               <Tooltip title="关闭">
                 <Button
@@ -490,7 +490,7 @@ function VirtualMachines() {
             </>
           )}
           
-          {record.status === 'suspended' && record.type === 'qemu' && hasPermission('vm_control') && (
+          {record.status === 'suspended' && record.type === 'qemu' && hasPermission('vm:start') && (
             <Tooltip title="恢复">
               <Button
                 type="primary"
@@ -502,7 +502,7 @@ function VirtualMachines() {
             </Tooltip>
           )}
           
-          {record.status === 'stopped' && hasPermission('vm_control') && (
+          {record.status === 'stopped' && hasPermission('vm:delete') && (
             <Tooltip title="删除">
               <Button
                 size="small"
@@ -538,7 +538,7 @@ function VirtualMachines() {
               ))}
             </Select>
             
-            {hasPermission('vm_control') && (
+            {hasPermission('vm:start') && (
               <>
                 <Button
                   icon={selectedRowKeys.length === filteredVMs.length ? <CheckSquareOutlined /> : <BorderOutlined />}

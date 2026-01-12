@@ -195,12 +195,23 @@ export function setupGroupRoutes(app: Express, pveManager: PVEManager) {
       
       for (const member of members) {
         try {
-          await database.run(`
-            INSERT OR IGNORE INTO vm_group_members (group_id, connection_id, node, vmid)
-            VALUES (?, ?, ?, ?)
+          // 先检查是否已存在
+          const exists = await database.get(`
+            SELECT * FROM vm_group_members 
+            WHERE group_id = ? AND connection_id = ? AND node = ? AND vmid = ?
           `, [id, member.connection_id, member.node, member.vmid]);
-          added++;
+          
+          if (exists) {
+            skipped++;
+          } else {
+            await database.run(`
+              INSERT INTO vm_group_members (group_id, connection_id, node, vmid)
+              VALUES (?, ?, ?, ?)
+            `, [id, member.connection_id, member.node, member.vmid]);
+            added++;
+          }
         } catch (err) {
+          console.error('添加分组成员失败:', err);
           skipped++;
         }
       }

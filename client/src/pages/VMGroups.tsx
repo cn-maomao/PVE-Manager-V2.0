@@ -142,8 +142,9 @@ function VMGroups() {
     if (!selectedGroup || selectedVMs.length === 0) return;
     
     const members = selectedVMs.map(key => {
-      const [connectionId, node, vmid] = key.split('-');
-      return { connection_id: connectionId, node, vmid: parseInt(vmid) };
+      // key 格式: connectionId::node::vmid (使用 :: 作为分隔符避免 connectionId 中的 - 影响)
+      const parts = key.split('::');
+      return { connection_id: parts[0], node: parts[1], vmid: parseInt(parts[2]) };
     });
 
     try {
@@ -427,8 +428,8 @@ function VMGroups() {
                 value={selectedVMs}
                 onChange={setSelectedVMs}
               >
-                {availableVMs.map(vm => (
-                  <Option key={`${vm.connectionId}-${vm.node}-${vm.vmid}`} value={`${vm.connectionId}-${vm.node}-${vm.vmid}`}>
+              {availableVMs.map(vm => (
+                  <Option key={`${vm.connectionId}::${vm.node}::${vm.vmid}`} value={`${vm.connectionId}::${vm.node}::${vm.vmid}`}>
                     {vm.name} ({vm.vmid}) - {vm.connectionName}
                   </Option>
                 ))}
