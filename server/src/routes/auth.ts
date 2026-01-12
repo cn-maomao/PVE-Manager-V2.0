@@ -201,16 +201,24 @@ export function setupAuthRoutes(app: Express) {
         `, [generateUserId(), 'admin', passwordHash, 'admin@localhost', UserRoles.ADMIN, 'active']);
         console.log('默认管理员账户已创建 (用户名: admin, 密码: admin123)');
       }
-    } catch (error) {
-      console.error('初始化默认管理员失败:', error);
+    } catch (error: any) {
+      // 如果表不存在，等待一下重试
+      if (error.code === 'SQLITE_ERROR' && error.message.includes('no such table')) {
+        console.log('等待数据库表创建完成...');
+        setTimeout(initDefaultAdmin, 1000);
+      } else {
+        console.error('初始化默认管理员失败:', error);
+      }
     }
   };
   
-  // 数据库就绪后初始化管理员
+  // 数据库就绪后延迟初始化管理员（给表创建预留时间）
   if (database.isReady) {
-    initDefaultAdmin();
+    setTimeout(initDefaultAdmin, 500);
   } else {
-    database.once('ready', initDefaultAdmin);
+    database.once('ready', () => {
+      setTimeout(initDefaultAdmin, 500);
+    });
   }
 
   // 用户登录
