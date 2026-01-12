@@ -1,123 +1,232 @@
-#      🚀 PVE Manager - Proxmox VE 管理与监控平台
+# 🚀 PVE Manager V2.0 - Proxmox VE 管理与监控平台
 
 <div align="center">
 
-![PVE Manager Logo](https://img.shields.io/badge/PVE-Manager-blue?style=for-the-badge&logo=proxmox)
+![PVE Manager Logo](https://img.shields.io/badge/PVE-Manager_V2.0-blue?style=for-the-badge&logo=proxmox)
 
 一个现代化的 **Proxmox VE** 管理和监控平台，提供美观的 Web 界面来管理多个 PVE 集群。
 
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://docker.com)
 [![TypeScript](https://img.shields.io/badge/typescript-ready-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/react-18.3-blue.svg)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/node.js-18+-green.svg)](https://nodejs.org/)
 
-[🚀 快速开始](#快速开始) • [📖 功能特性](#功能特性) • [🐳 Docker部署](#docker部署) • [🤝 贡献](#贡献)
+[🚀 快速开始](#快速开始) • [📖 功能特性](#功能特性) • [🔧 配置说明](#配置说明) • [🤝 贡献](#贡献)
 
 </div>
+
+---
+
+## 🙏 致谢
+
+本项目基于 [Dream0057/PVE-MGMT](https://github.com/Dream0057/PVE-MGMT) 开发，感谢原作者的开源贡献！
+
+V2.0 版本在原项目基础上进行了大量功能扩展和优化。
+
+**项目地址**: [https://github.com/cn-maomao/PVE-Manager-V2.0](https://github.com/cn-maomao/PVE-Manager-V2.0)
+
+---
+
+## ✨ V2.0 新功能
+
+### 🔐 多用户权限管理
+- 四种用户角色：管理员 / 操作员 / 普通用户 / 查看者
+- 基于角色的权限控制
+- 用户登录/登出管理
+- 会话管理和安全控制
+- **默认账户**: admin / admin123
+
+### 🏛️ 批量操作
+- 批量启动/关机/强制关机/重启虚拟机
+- 多选模式和全选功能
+- 操作确认和结果反馈
+
+### 📁 虚拟机分组
+- 创建和管理 VM 分组
+- 按分组批量操作
+- 分组颜色标识
+- 跨节点分组支持
+
+### 💾 备份管理
+- 创建虚拟机备份
+- 备份列表查看
+- 备份恢复功能
+- 备份删除管理
+- 支持多种备份模式（快照/挂起/停止）
+
+### 🖥️ VNC 远程控制
+- 网页端虚拟机控制台
+- VNC 会话管理
+- 支持全屏模式
+
+### ⏰ 定时任务调度
+- 定时开关机任务
+- 定时备份任务
+- 支持每日/每周/一次性调度
+- 任务执行历史记录
+- 手动触发执行
+
+### 📝 操作日志审计
+- 完整的操作记录
+- 用户行为追踪
+- 日志筛选和导出
+- 操作统计分析
+
+### ⚙️ 系统设置
+- 告警规则配置
+- 数据保留设置
+- 安全策略配置
+- 数据维护功能
+
+---
 
 ## 功能特性
 
 ### ✅ 已实现功能
-- **多PVE连接管理**: 支持同时管理多个 Proxmox VE 集群
-- **虚拟机管理**: 启动、停止、重启、挂起、删除虚拟机和容器
-- **实时监控**: CPU、内存、存储使用率监控
-- **资源统计**: 图表展示资源使用趋势
-- **WebSocket实时通信**: 实时状态更新
-- **开发记录系统**: 自动记录开发进度和上下文
-- **🆕 告警系统**: 完整的告警管理和监控系统
-  - 实时告警监控和生成
-  - 多级别告警 (严重/警告/信息)
-  - 多类型告警 (PVE系统/性能/网络/服务)
-  - 告警状态管理 (活跃/已确认/已解决)
-  - 自动告警解决机制
-  - 用户友好的告警管理界面
 
-### 🚧 开发中功能
-- **用户权限管理**: 多用户访问控制
-- **备份管理**: 虚拟机备份和恢复
-- **模板管理**: VM模板创建和部署
-<img width="1096" height="613" alt="PVE-MGMT1" src="https://github.com/user-attachments/assets/a58155a3-9484-4345-9be0-8916f4007ca9" />
+| 功能模块 | 描述 |
+|---------|------|
+| 🔐 **用户权限管理** | 多用户、多角色权限控制系统 |
+| 🖥️ **多PVE连接管理** | 支持同时管理多个 Proxmox VE 集群 |
+| 💻 **虚拟机管理** | 启动、停止、重启、挂起、删除虚拟机和容器 |
+| 🏛️ **批量操作** | 批量启动/关机/重启多个虚拟机 |
+| 📁 **VM分组管理** | 虚拟机分组和分组批量操作 |
+| 💾 **备份管理** | 虚拟机备份和恢复 |
+| 🖥️ **VNC远程控制** | 网页端虚拟机控制台 |
+| ⏰ **定时任务** | 定时开关机、定时备份 |
+| 📝 **操作日志** | 完整的操作审计记录 |
+| 📊 **实时监控** | CPU、内存、存储使用率监控 |
+| 📈 **资源统计** | 图表展示资源使用趋势 |
+| 🌐 **流量监控** | VM网络流量实时监控 |
+| 🔔 **告警系统** | 多级别告警管理和自动解决 |
+| ⚡ **WebSocket** | 实时状态更新 |
+| ⚙️ **系统设置** | 告警、安全、数据维护配置 |
+
+---
 
 ## 技术栈
 
 ### 后端
-- **Node.js** + **Express** + **TypeScript**
+- **Node.js 18+** + **Express** + **TypeScript**
 - **Socket.IO** (实时通信)
+- **SQLite** (数据存储)
+- **JWT** (身份认证)
+- **bcrypt** (密码加密)
 - **Axios** (HTTP客户端)
-- **Winston** (日志)
-- **🆕 SQLite** (告警数据存储)
 
 ### 前端
-- **React** + **TypeScript** + **Vite**
-- **Ant Design** (UI组件库)
+- **React 18** + **TypeScript** + **Vite**
+- **Ant Design 5** (UI组件库)
 - **Recharts** (图表库)
 - **Socket.IO Client** (实时通信)
-- **🆕 Day.js** (时间处理)
+- **Day.js** (时间处理)
 
-### 开发工具
-- **开发记录系统**: 自动记录开发进度
-- **ESLint** + **TypeScript** (代码质量)
+---
 
 ## 项目结构
 
 ```
-/pve-manager/
-├── server/              # 后端服务
+PVE-Manager-V2.0/
+├── server/                    # 后端服务
 │   ├── src/
-│   │   ├── config/      # 配置文件
-│   │   ├── services/    # 业务逻辑
-│   │   ├── routes/      # API路由
-│   │   │   ├── pve.ts   # PVE管理API
-│   │   │   ├── traffic.ts # 流量监控API
-│   │   │   └── alerts.ts  # 🆕 告警系统API
-│   │   ├── websockets/  # WebSocket处理
-│   │   ├── db/          # 数据库相关
-│   │   │   └── database.js # SQLite数据库
-│   │   └── server.ts    # 服务器入口
-│   ├── data/            # 数据存储
-│   │   └── pve_manager.db # SQLite数据库文件
-│   ├── check-alerts-db.js # 🆕 告警数据库检查脚本
-│   ├── test-alerts-api.js # 🆕 告警API测试脚本
-│   └── package.json
-├── client/              # 前端应用
+│   │   ├── routes/
+│   │   │   ├── auth.ts       # 🆕 认证和用户管理
+│   │   │   ├── logs.ts       # 🆕 操作日志
+│   │   │   ├── groups.ts     # 🆕 VM分组管理
+│   │   │   ├── batch.ts      # 🆕 批量操作
+│   │   │   ├── backup.ts     # 🆕 备份管理
+│   │   │   ├── vnc.ts        # 🆕 VNC远程控制
+│   │   │   ├── scheduler.ts  # 🆕 定时任务
+│   │   │   ├── pve.ts        # PVE管理API
+│   │   │   ├── alerts.ts     # 告警系统
+│   │   │   └── traffic.ts    # 流量监控
+│   │   ├── services/         # 业务逻辑
+│   │   ├── db/               # 数据库
+│   │   └── server.ts         # 服务器入口
+│   └── data/                  # SQLite数据库
+├── client/                    # 前端应用
 │   ├── src/
-│   │   ├── components/  # React组件
-│   │   │   └── Layout/  # 布局组件
-│   │   ├── pages/       # 页面组件
-│   │   │   ├── Dashboard.tsx
-│   │   │   ├── Connections.tsx
-│   │   │   ├── VirtualMachines.tsx
-│   │   │   ├── Monitoring.tsx
-│   │   │   └── Alerts.tsx # 🆕 告警管理页面
-│   │   ├── contexts/    # React Context
-│   │   └── main.tsx     # 应用入口
+│   │   ├── pages/
+│   │   │   ├── Login.tsx         # 🆕 登录页面
+│   │   │   ├── Users.tsx         # 🆕 用户管理
+│   │   │   ├── VMGroups.tsx      # 🆕 VM分组
+│   │   │   ├── Logs.tsx          # 🆕 操作日志
+│   │   │   ├── Backups.tsx       # 🆕 备份管理
+│   │   │   ├── ScheduledTasks.tsx # 🆕 定时任务
+│   │   │   ├── Settings.tsx      # 🆕 系统设置
+│   │   │   └── ...
+│   │   ├── components/
+│   │   │   └── VNCConsole.tsx    # 🆕 VNC控制台
+│   │   ├── contexts/
+│   │   │   ├── AuthContext.tsx   # 🆕 认证上下文
+│   │   │   └── PVEContext.tsx
+│   │   └── App.tsx
 │   └── package.json
-├── dev-logger/          # 开发记录系统
-│   ├── simple-logger.js # 日志记录脚本
-│   ├── development-log.json # 开发日志
-│   └── context.md       # 开发上下文
-└── package.json         # 根项目配置
+├── start.sh                   # Linux/macOS启动脚本
+├── start.ps1                  # 🆕 Windows启动脚本
+└── README.md
 ```
+
+---
 
 ## 快速开始
 
-### 🎯 超简单启动（推荐新用户）
+### 🎯 一键启动
 
 ```bash
-# 克隆项目后，只需要一个命令！
+# 克隆项目
+git clone https://github.com/cn-maomao/PVE-Manager-V2.0.git
+cd PVE-Manager-V2.0
+
+# Linux/macOS
 ./start.sh
+
+# Windows PowerShell
+.\start.ps1
 ```
 
 首次运行会自动：
-1. 检查系统环境
-2. 引导你配置网络参数
-3. 安装所有依赖 
-4. 构建和启动项目
+1. ✅ 检查系统环境
+2. ✅ 引导配置网络参数
+3. ✅ 安装所有依赖 
+4. ✅ 构建和启动项目
+5. ✅ 创建默认管理员账户
+
+### 📌 默认账户
+
+```
+用户名: admin
+密码: admin123
+```
+
+> ⚠️ **重要**: 首次登录后请立即修改默认密码！
 
 ### 环境要求
-- Node.js 22+ 
-- npm 10+
+- Node.js 18+ 
+- npm 8+
 - 一个或多个 Proxmox VE 服务器
+
+### 启动脚本参数
+
+**Linux/macOS (start.sh)**
+
+```bash
+./start.sh              # 正常启动
+./start.sh --init       # 重新初始化配置
+./start.sh --reset      # 重置所有配置
+./start.sh --reset-db   # 重置数据库（删除所有数据）
+./start.sh --help       # 显示帮助信息
+```
+
+**Windows (start.ps1)**
+
+```powershell
+.\start.ps1             # 正常启动
+.\start.ps1 -Init       # 重新初始化配置
+.\start.ps1 -Reset      # 重置所有配置
+.\start.ps1 -ResetDB    # 重置数据库（删除所有数据）
+.\start.ps1 -Help       # 显示帮助信息
+```
 
 ### 手动安装依赖（可选）
 
@@ -410,41 +519,37 @@ VITE_ENV=production
 
 MIT License
 
+---
+
 ## 📋 更新日志
 
-### v1.0.1 (2025-07-23)
+### v2.0.0 (2026-01-12)
 
-**🔧 问题修复**:
-- 修复 Antd Card 组件 `bodyStyle` 废弃警告
-- 修复 Antd Tabs 组件 `TabPane` 废弃警告  
-- 修复 React Router v7 未来标志警告
-- 修复 TrafficRecords 组件无限更新循环问题
-- 优化网络请求错误处理
-- 添加 WebSocket 连接错误处理和重连机制
+**🆕 新功能:**
+- 多用户权限管理系统（管理员/操作员/用户/查看者）
+- 批量操作功能（批量启动/关机/重启）
+- VM分组管理
+- 备份管理（创建/恢复/删除）
+- VNC远程控制
+- 定时任务调度（定时开关机/备份）
+- 操作日志审计
+- 系统设置页面
+- Windows PowerShell 启动脚本
 
-**📚 文档更新**:
-- 新增 [问题修复报告](BUGFIX_REPORT_2025-07-23.md)
-- 新增 [技术解决方案参考](TECHNICAL_SOLUTIONS.md)
+**🔧 改进:**
+- 重构认证系统
+- 优化前端路由
+- 增强安全性
+- 改进用户体验
 
-**🚀 改进**:
-- 使用 `useCallback` 优化组件性能
-- 改进错误边界处理
-- 提升代码质量和可维护性  
-
-详细修复信息请查看 [BUGFIX_REPORT_2025-07-23.md](BUGFIX_REPORT_2025-07-23.md)
-
-### v1.0.0 (2025-07-22)
-- 初始版本发布
+### v1.0.0 (基于 PVE-MGMT)
 - 基础 PVE 管理功能
 - 虚拟机监控和流量统计
 - 告警系统
 
 ## 🔧 故障排除
 
-如遇到问题，请参考：
-1. [技术解决方案参考](TECHNICAL_SOLUTIONS.md) - 常见问题解决方案
-2. [问题修复报告](BUGFIX_REPORT_2025-07-23.md) - 已知问题及修复记录
-
+如遇到问题，请创建Issue并附带报错日记及详细说明
 ### 常见问题
 
 **Q: 页面无法访问，提示连接被拒绝？**  
@@ -459,11 +564,32 @@ npm run dev
 ```
 
 **Q: 控制台出现 Antd 组件废弃警告？**  
-A: 项目已在 v1.0.1 版本中修复，请查看 [技术解决方案参考](TECHNICAL_SOLUTIONS.md)
+A: 项目已在 v1.0.1 版本中修复
 
 **Q: 组件出现无限更新循环？**  
-A: 检查 useEffect 依赖数组设置，参考 [TECHNICAL_SOLUTIONS.md](TECHNICAL_SOLUTIONS.md) 中的最佳实践
+A: 检查 useEffect 依赖数组设置
+
+---
+
+## 贡献指南
+
+1. Fork 项目
+2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 创建 Pull Request
+
+---
+
+## 许可证
+
+MIT License
+
+---
 
 ## 联系信息
+
+- **项目地址**: [https://github.com/cn-maomao/PVE-Manager-V2.0](https://github.com/cn-maomao/PVE-Manager-V2.0)
+- **原项目**: [https://github.com/Dream0057/PVE-MGMT](https://github.com/Dream0057/PVE-MGMT)
 
 如有问题或建议，请创建 Issue。
