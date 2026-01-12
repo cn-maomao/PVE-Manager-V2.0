@@ -16,6 +16,7 @@ import {
   CloudServerOutlined,
   ClockCircleOutlined,
   SettingOutlined,
+  VideoCameraOutlined,
 } from '@ant-design/icons';
 import { useAuth, Roles } from '../../contexts/AuthContext';
 
@@ -86,6 +87,11 @@ function Sidebar() {
       key: '/scheduled-tasks',
       icon: <ClockCircleOutlined />,
       label: '调度任务',
+    },
+    {
+      key: '/vnc-recordings',
+      icon: <VideoCameraOutlined />,
+      label: 'VNC录屏',
     },
     {
       key: '/logs',

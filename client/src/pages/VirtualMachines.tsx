@@ -25,6 +25,8 @@ import {
   DownOutlined,
   CheckSquareOutlined,
   BorderOutlined,
+  CloudUploadOutlined,
+  AppstoreOutlined,
 } from '@ant-design/icons';
 import { usePVE } from '../contexts/PVEContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -57,6 +59,10 @@ function VirtualMachines() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [vncVisible, setVncVisible] = useState(false);
   const [vncTarget, setVncTarget] = useState<VMRecord | null>(null);
+  const [batchVncVisible, setBatchVncVisible] = useState(false);
+  const [batchVncTargets, setBatchVncTargets] = useState<VMRecord[]>([]);
+  const [backupModalVisible, setBackupModalVisible] = useState(false);
+  const [backupStorage, setBackupStorage] = useState<string>('local');
 
   const filteredVMs = selectedConnection === 'all' 
     ? vms 
@@ -172,6 +178,83 @@ function VirtualMachines() {
     setVncVisible(true);
   };
 
+  // 批量打开VNC控制台
+  const openBatchVNC = () => {
+    const runningVMs = selectedVMs.filter(vm => vm.status === 'running');
+    if (runningVMs.length === 0) {
+      message.warning('选中的虚拟机都未运行');
+      return;
+    }
+    setBatchVncTargets(runningVMs);
+    setBatchVncVisible(true);
+  };
+
+  // 处理批量备份
+  const handleBatchBackup = async () => {
+    if (selectedVMs.length === 0) {
+      message.warning('请先选择虚拟机');
+      return;
+    }
+
+    Modal.confirm({
+      title: '批量备份',
+      content: (
+        <div>
+          <p>确定要对选中的 {selectedVMs.length} 台虚拟机创建备份吗？</p>
+          <p style={{ marginTop: 8 }}>备份存储: {backupStorage}</p>
+        </div>
+      ),
+      okText: '开始备份',
+      cancelText: '取消',
+      async onOk() {
+        setBatchLoading(true);
+        try {
+          const vmList = selectedVMs.map(vm => ({
+            connection_id: vm.connectionId,
+            node: vm.node,
+            vmid: vm.vmid,
+            type: vm.type,
+          }));
+
+          const response = await fetch(`${API_BASE_URL}/api/batch/backups`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ 
+              vms: vmList, 
+              storage: backupStorage,
+              mode: 'snapshot',
+              compress: 'zstd'
+            }),
+          });
+
+          const data = await response.json();
+          
+          if (data.success) {
+            const successCount = data.results.filter((r: any) => r.success).length;
+            const failCount = data.results.filter((r: any) => !r.success).length;
+            
+            if (failCount > 0) {
+              message.warning(`备份任务已启动: ${successCount} 成功, ${failCount} 失败`);
+            } else {
+              message.success(`批量备份任务已启动: ${successCount} 台虚拟机`);
+            }
+            
+            setSelectedRowKeys([]);
+          } else {
+            message.error(data.error || '批量备份失败');
+          }
+        } catch (error: any) {
+          message.error(`批量备份失败: ${error.message}`);
+        } finally {
+          setBatchLoading(false);
+        }
+      },
+    });
+  };
+
   // 批量操作菜单
   const batchMenuItems: MenuProps['items'] = [
     {
@@ -198,6 +281,19 @@ function VirtualMachines() {
       icon: <ReloadOutlined />,
       label: '批量重启',
       onClick: () => handleBatchAction('reboot'),
+    },
+    { type: 'divider' },
+    {
+      key: 'vnc',
+      icon: <AppstoreOutlined />,
+      label: '批量打开控制台',
+      onClick: openBatchVNC,
+    },
+    {
+      key: 'backup',
+      icon: <CloudUploadOutlined />,
+      label: '批量备份',
+      onClick: handleBatchBackup,
     },
   ];
 
@@ -518,6 +614,48 @@ function VirtualMachines() {
           vmtype={vncTarget.type}
         />
       )}
+
+      {/* 批量 VNC 控制台 Modal */}
+      <Modal
+        title={`批量控制台 (${batchVncTargets.length} 台虚拟机)`}
+        open={batchVncVisible}
+        onCancel={() => {
+          setBatchVncVisible(false);
+          setBatchVncTargets([]);
+        }}
+        width={1200}
+        footer={null}
+        styles={{ body: { maxHeight: '70vh', overflow: 'auto' } }}
+      >
+        <Alert
+          message="批量远程控制"
+          description="点击下方按钮在新窗口中打开各虚拟机的控制台"
+          type="info"
+          showIcon
+          style={{ marginBottom: 16 }}
+        />
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+          {batchVncTargets.map(vm => (
+            <Card 
+              key={`${vm.connectionId}-${vm.vmid}`}
+              size="small" 
+              style={{ width: 280 }}
+              title={`${vm.name} (${vm.vmid})`}
+            >
+              <p>节点: {vm.node}</p>
+              <p>连接: {vm.connectionName}</p>
+              <Button
+                type="primary"
+                icon={<DesktopOutlined />}
+                onClick={() => openVNCConsole(vm)}
+                block
+              >
+                打开控制台
+              </Button>
+            </Card>
+          ))}
+        </div>
+      </Modal>
     </>
   );
 }

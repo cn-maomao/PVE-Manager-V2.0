@@ -535,7 +535,6 @@ function VMResourceMonitor() {
             pageSizeOptions: ['10', '20', '50', '100'],
           }}
           scroll={{ x: 1000, y: window.innerHeight - 400 }}
-          loading={loading}
           bordered
           style={{ fontSize: 12 }}
           rowClassName={(record, index) => {
