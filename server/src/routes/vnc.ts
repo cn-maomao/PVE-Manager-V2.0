@@ -95,8 +95,9 @@ export function setupVNCRoutes(app: Express, pveManager: PVEManager, io: SocketI
         ticket: vncInfo.ticket,
         port: vncInfo.port,
         user: vncInfo.user,
-        // 构建WebSocket URL
-        wsUrl: `wss://${connection.config.host}:${connection.config.port}/api2/json/nodes/${node}/${type}/${vmid}/vncwebsocket?port=${vncInfo.port}&vncticket=${encodeURIComponent(vncInfo.ticket)}`,
+        // 返回 PVE 主机信息供前端构建 noVNC URL
+        pveHost: connection.config.host,
+        pvePort: connection.config.port,
         sessionId,
         recordingId,
         vmname: vmStatus.name

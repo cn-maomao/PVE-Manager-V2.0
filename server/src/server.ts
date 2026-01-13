@@ -19,6 +19,7 @@ import { setupGroupRoutes } from './routes/groups';
 import { setupBatchRoutes } from './routes/batch';
 import { setupBackupRoutes } from './routes/backup';
 import { setupVNCRoutes } from './routes/vnc';
+import { setupShellRoutes } from './routes/shell';
 import { createSchedulerRoutes, initScheduler } from './routes/scheduler';
 
 // 导入流量监控模块
@@ -126,6 +127,7 @@ setupGroupRoutes(app, pveManager); // 分组路由
 setupBatchRoutes(app, pveManager); // 批量操作路由
 setupBackupRoutes(app, pveManager); // 备份路由
 setupVNCRoutes(app, pveManager, io); // VNC远程控制路由
+setupShellRoutes(app, pveManager); // Shell命令执行路由
 
 // 调度任务路由将在数据库就绪后初始化
 let schedulerInitialized = false;

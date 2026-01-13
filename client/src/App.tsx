@@ -20,6 +20,7 @@ import Backups from './pages/Backups';
 import ScheduledTasks from './pages/ScheduledTasks';
 import Settings from './pages/Settings';
 import VNCRecordings from './pages/VNCRecordings';
+import Shell from './pages/Shell';
 import { PVEProvider } from './contexts/PVEContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
@@ -70,6 +71,7 @@ function MainLayout() {
               <Route path="/backups" element={<Backups />} />
               <Route path="/scheduled-tasks" element={<ScheduledTasks />} />
               <Route path="/vnc-recordings" element={<VNCRecordings />} />
+              <Route path="/shell" element={<Shell />} />
               <Route path="/settings" element={<Settings />} />
             </Routes>
           </Content>

@@ -282,6 +282,25 @@ class Database extends EventEmitter {
         FOREIGN KEY (task_id) REFERENCES scheduled_tasks(id) ON DELETE CASCADE
       )`,
 
+      // Shell命令执行历史表
+      `CREATE TABLE IF NOT EXISTS shell_history (
+        id TEXT PRIMARY KEY,
+        user_id TEXT,
+        username TEXT,
+        connection_id TEXT NOT NULL,
+        connection_name TEXT,
+        node TEXT NOT NULL,
+        command TEXT NOT NULL,
+        output TEXT,
+        error TEXT,
+        exit_code INTEGER DEFAULT 0,
+        duration INTEGER DEFAULT 0,
+        batch_id TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+        FOREIGN KEY (connection_id) REFERENCES pve_connections(id) ON DELETE CASCADE
+      )`,
+
       // 创建索引
       'CREATE INDEX IF NOT EXISTS idx_traffic_hourly_hour ON traffic_hourly(hour)',
       'CREATE INDEX IF NOT EXISTS idx_traffic_hourly_vm ON traffic_hourly(vm_key)',
@@ -308,7 +327,10 @@ class Database extends EventEmitter {
       'CREATE INDEX IF NOT EXISTS idx_scheduled_tasks_enabled ON scheduled_tasks(enabled)',
       'CREATE INDEX IF NOT EXISTS idx_scheduled_tasks_next_run ON scheduled_tasks(next_run)',
       'CREATE INDEX IF NOT EXISTS idx_task_history_task ON task_history(task_id)',
-      'CREATE INDEX IF NOT EXISTS idx_task_history_status ON task_history(status)'
+      'CREATE INDEX IF NOT EXISTS idx_task_history_status ON task_history(status)',
+      'CREATE INDEX IF NOT EXISTS idx_shell_history_user ON shell_history(user_id)',
+      'CREATE INDEX IF NOT EXISTS idx_shell_history_connection ON shell_history(connection_id)',
+      'CREATE INDEX IF NOT EXISTS idx_shell_history_created ON shell_history(created_at)'
     ];
 
     // 序列化执行所有SQL语句

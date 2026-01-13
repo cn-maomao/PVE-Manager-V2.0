@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Modal, Spin, Button, Space, message, Alert, Typography } from 'antd';
+import { Modal, Spin, Button, Space, message, Alert, Typography, Input } from 'antd';
 import { 
   ExpandOutlined, CompressOutlined, ReloadOutlined, 
-  DesktopOutlined, CloseOutlined 
+  DesktopOutlined, CloseOutlined, CopyOutlined, ExportOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 
-const { Text } = Typography;
+const { Text, Paragraph } = Typography;
 
 interface VNCConsoleProps {
   visible: boolean;
@@ -18,16 +18,22 @@ interface VNCConsoleProps {
   vmtype: 'qemu' | 'lxc';
 }
 
+interface VNCInfo {
+  pveHost: string;
+  pvePort: number;
+  ticket: string;
+  port: number;
+  sessionId: string;
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 function VNCConsole({ visible, onClose, connectionId, node, vmid, vmname, vmtype }: VNCConsoleProps) {
   const { token } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [vncUrl, setVncUrl] = useState<string | null>(null);
+  const [vncInfo, setVncInfo] = useState<VNCInfo | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const startTime = useRef<Date | null>(null);
 
@@ -61,14 +67,14 @@ function VNCConsole({ visible, onClose, connectionId, node, vmid, vmname, vmtype
       const data = await response.json();
       
       if (response.ok && data.success) {
-        setVncUrl(data.wsUrl);
+        setVncInfo({
+          pveHost: data.pveHost,
+          pvePort: data.pvePort,
+          ticket: data.ticket,
+          port: data.port,
+          sessionId: data.sessionId
+        });
         setSessionId(data.sessionId);
-        
-        // 使用 PVE 内置的 noVNC
-        // 构建 noVNC URL - 直接访问 PVE 的 noVNC 页面
-        const pveNoVncUrl = `https://${new URL(data.wsUrl).host}/?console=${vmtype}&vmid=${vmid}&vmname=${encodeURIComponent(vmname)}&node=${node}&resize=scale&novnc=1`;
-        setVncUrl(pveNoVncUrl);
-        
         setLoading(false);
       } else {
         throw new Error(data.error || 'Failed to get VNC connection');
@@ -104,16 +110,6 @@ function VNCConsole({ visible, onClose, connectionId, node, vmid, vmname, vmtype
     startTime.current = null;
   };
 
-  const handleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      containerRef.current?.requestFullscreen();
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen();
-      setIsFullscreen(false);
-    }
-  };
-
   const handleReload = () => {
     disconnectVNC();
     setTimeout(connectVNC, 500);
@@ -122,6 +118,23 @@ function VNCConsole({ visible, onClose, connectionId, node, vmid, vmname, vmtype
   const handleClose = () => {
     disconnectVNC();
     onClose();
+  };
+
+  // 构建 PVE noVNC URL
+  const buildNoVncUrl = () => {
+    if (!vncInfo) return null;
+    // PVE 内置 noVNC 控制台 URL 格式
+    return `https://${vncInfo.pveHost}:${vncInfo.pvePort}/?console=${vmtype}&novnc=1&vmid=${vmid}&vmname=${encodeURIComponent(vmname)}&node=${node}&resize=scale&cmd=`;
+  };
+
+  // 在新窗口打开 VNC
+  const openInNewWindow = () => {
+    const url = buildNoVncUrl();
+    if (url) {
+      const windowFeatures = 'width=1024,height=768,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=no';
+      window.open(url, `vnc_${vmid}_${Date.now()}`, windowFeatures);
+      message.success(`已在新窗口打开 ${vmname} 的控制台`);
+    }
   };
 
   return (
@@ -134,16 +147,12 @@ function VNCConsole({ visible, onClose, connectionId, node, vmid, vmname, vmtype
       }
       open={visible}
       onCancel={handleClose}
-      width={1024}
-      style={{ top: 20 }}
-      styles={{ body: { padding: 0, height: '70vh' } }}
+      width={600}
+      style={{ top: 100 }}
       footer={
         <Space>
           <Button icon={<ReloadOutlined />} onClick={handleReload}>
-            重新连接
-          </Button>
-          <Button icon={isFullscreen ? <CompressOutlined /> : <ExpandOutlined />} onClick={handleFullscreen}>
-            {isFullscreen ? '退出全屏' : '全屏'}
+            重新获取
           </Button>
           <Button type="primary" icon={<CloseOutlined />} onClick={handleClose}>
             关闭
@@ -151,69 +160,98 @@ function VNCConsole({ visible, onClose, connectionId, node, vmid, vmname, vmtype
         </Space>
       }
     >
-      <div ref={containerRef} style={{ width: '100%', height: '100%', background: '#000' }}>
+      <div ref={containerRef}>
         {loading && (
           <div style={{ 
             display: 'flex', 
             justifyContent: 'center', 
             alignItems: 'center', 
-            height: '100%',
+            height: 200,
             flexDirection: 'column',
             gap: 16
           }}>
             <Spin size="large" />
-            <Text style={{ color: '#fff' }}>正在连接控制台...</Text>
+            <Text>正在获取控制台信息...</Text>
           </div>
         )}
         
         {error && (
-          <div style={{ padding: 24 }}>
-            <Alert
-              type="error"
-              message="连接失败"
-              description={
-                <div>
-                  <p>{error}</p>
-                  <p style={{ marginTop: 8 }}>
-                    <strong>提示:</strong> 请确保:
-                  </p>
-                  <ul>
-                    <li>虚拟机正在运行</li>
-                    <li>PVE服务器可访问</li>
-                    <li>浏览器允许访问HTTPS站点</li>
-                  </ul>
-                  <Button type="primary" onClick={handleReload} style={{ marginTop: 16 }}>
-                    重试连接
-                  </Button>
-                </div>
-              }
-            />
-          </div>
+          <Alert
+            type="error"
+            message="获取控制台信息失败"
+            description={
+              <div>
+                <p>{error}</p>
+                <p style={{ marginTop: 8 }}><strong>请确保:</strong></p>
+                <ul style={{ margin: '8px 0', paddingLeft: 20 }}>
+                  <li>虚拟机正在运行</li>
+                  <li>PVE服务器可访问</li>
+                </ul>
+                <Button type="primary" onClick={handleReload} size="small">
+                  重试
+                </Button>
+              </div>
+            }
+            style={{ marginBottom: 16 }}
+          />
         )}
         
-        {!loading && !error && vncUrl && (
-          <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+        {!loading && !error && vncInfo && (
+          <div>
+            <Alert
+              type="success"
+              message="控制台已就绪"
+              description={`已获取 ${vmname} (VM ${vmid}) 的控制台连接信息`}
+              style={{ marginBottom: 16 }}
+            />
+            
+            <div style={{ marginBottom: 16 }}>
+              <Text strong>控制台地址:</Text>
+              <Input.TextArea
+                value={buildNoVncUrl() || ''}
+                rows={2}
+                readOnly
+                style={{ marginTop: 8, fontSize: 12 }}
+              />
+            </div>
+            
+            <Space direction="vertical" style={{ width: '100%' }}>
+              <Button 
+                type="primary" 
+                icon={<ExportOutlined />}
+                onClick={openInNewWindow}
+                block
+                size="large"
+              >
+                在新窗口打开 VNC 控制台
+              </Button>
+              
+              <Button 
+                icon={<CopyOutlined />}
+                onClick={() => {
+                  const url = buildNoVncUrl();
+                  if (url) {
+                    navigator.clipboard.writeText(url);
+                    message.success('已复制控制台URL');
+                  }
+                }}
+                block
+              >
+                复制控制台URL
+              </Button>
+            </Space>
+            
             <Alert
               type="info"
-              message="VNC 控制台"
+              message="使用提示"
               description={
-                <div>
-                  <p>由于浏览器安全限制，无法直接嵌入 PVE 的 noVNC 页面。</p>
-                  <p>请点击下方按钮在新窗口中打开控制台:</p>
-                  <Button 
-                    type="primary" 
-                    icon={<DesktopOutlined />}
-                    onClick={() => window.open(vncUrl, '_blank', 'width=1024,height=768')}
-                    style={{ marginTop: 8 }}
-                  >
-                    打开 VNC 控制台
-                  </Button>
-                  <p style={{ marginTop: 16, fontSize: 12, color: '#666' }}>
-                    提示: 如果需要使用 SPICE 协议（性能更好），请在 PVE 中配置虚拟机显示为 SPICE。
-                  </p>
-                </div>
+                <ul style={{ margin: '8px 0', paddingLeft: 20, fontSize: 12 }}>
+                  <li>点击按钮将在新窗口中打开 PVE 内置的 noVNC 控制台</li>
+                  <li>如需登录 PVE，请使用您的 PVE 账号密码</li>
+                  <li>支持同时打开多个虚拟机的控制台窗口</li>
+                </ul>
               }
-              style={{ margin: 24 }}
+              style={{ marginTop: 16 }}
             />
           </div>
         )}

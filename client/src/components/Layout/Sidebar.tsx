@@ -17,6 +17,7 @@ import {
   ClockCircleOutlined,
   SettingOutlined,
   VideoCameraOutlined,
+  CodeOutlined,
 } from '@ant-design/icons';
 import { useAuth, Roles } from '../../contexts/AuthContext';
 
@@ -92,6 +93,11 @@ function Sidebar() {
       key: '/vnc-recordings',
       icon: <VideoCameraOutlined />,
       label: 'VNC录屏',
+    },
+    {
+      key: '/shell',
+      icon: <CodeOutlined />,
+      label: 'Shell执行',
     },
     {
       key: '/logs',
